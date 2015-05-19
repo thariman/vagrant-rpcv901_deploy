@@ -9,6 +9,8 @@
    - git
    - vim
    - fping
+   - build-essential
+   - python-dev
    
 - name: Clone RPC repository
   command: chdir=/opt git clone -b 9.0.9 https://github.com/stackforge/os-ansible-deployment.git
