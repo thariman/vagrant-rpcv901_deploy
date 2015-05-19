@@ -15,7 +15,7 @@ SCRIPT
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
-  config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "trusty64"
 
   # Turn off shared folders
   config.vm.synced_folder ".", "/vagrant", id: "vagrant-root", disabled: true
@@ -34,6 +34,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     deploy1_config.vm.provider "vmware_fusion" do |v|
         v.vmx["memsize"] = "2048"
         v.vmx["numvcpus"] = "1"
+    end
+
+    deploy1_config.vm.provider :libvirt do |v|
+        v.memory = 2048
+        v.cpus = 1
     end
 
     deploy1_config.vm.provider "virtualbox" do |v|

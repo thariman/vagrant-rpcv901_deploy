@@ -21,6 +21,9 @@
   
 - name: Install Ansible and RPC dependencies
   command: chdir=/opt pip install -r /opt/os-ansible-deployment/requirements.txt
+
+- name: Creates directory
+  file: path=/root/.ssh state=directory
     
 - name: Copy private key to host
   copy: src=id_rsa dest=/root/.ssh mode=0600
