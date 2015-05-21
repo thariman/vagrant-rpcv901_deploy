@@ -22,10 +22,12 @@ set -o xtrace
 
 cd /opt/os-ansible-deployment/rpc_deployment
 fping 172.29.236.2 172.29.236.5 172.29.236.10
-ansible-playbook -v -e @/etc/rpc_deploy/user_variables.yml playbooks/setup/host-setup.yml
-ansible-playbook -v -e @/etc/rpc_deploy/user_variables.yml playbooks/infrastructure/haproxy-install.yml
-ansible-playbook -v -e @/etc/rpc_deploy/user_variables.yml playbooks/openstack/openstack-setup.yml
+ansible-playbook -e @/etc/rpc_deploy/user_variables.yml playbooks/setup/host-setup.yml 2>&1 | tee /root/host-setup.log
+ansible-playbook -e @/etc/rpc_deploy/user_variables.yml playbooks/infrastructure/haproxy-install.yml 2>&1 | tee /root/haproxy-install.log
+ansible-playbook -e @/etc/rpc_deploy/user_variables.yml playbooks/infrastructure/infrastructure-setup.yml 2>&1 | tee /root/infrastructure-setup.log
+ansible-playbook -e @/etc/rpc_deploy/user_variables.yml playbooks/openstack/openstack-setup.yml 2>&1 | tee /root/openstack-setup.log
 EOF
+chmod +x /root/start1.sh
 SCRIPT
 
 $proxy = <<SCRIPT
@@ -34,6 +36,8 @@ SCRIPT
 
 $aptchange = <<SCRIPT
 sed -i "s#//kambing.ui.ac.id#//buaya.klas.or.id#g" /etc/apt/sources.list
+sed -i "s#//archive.ubuntu.com#//buaya.klas.or.id#g" /etc/apt/sources.list
+sed -i "s#//security.ubuntu.com#//buaya.klas.or.id#g" /etc/apt/sources.list
 apt-get -qq update
 SCRIPT
 
