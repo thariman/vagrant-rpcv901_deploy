@@ -5,7 +5,7 @@
 VAGRANTFILE_API_VERSION = "2"
 
 $script = <<SCRIPT
-cat << EOF >> /etc/hosts
+cat << \EOF >> /etc/hosts
 172.29.236.7 deploy1
 172.29.236.2 021579-infra01
 172.29.236.5 021579-logging01
@@ -13,8 +13,28 @@ cat << EOF >> /etc/hosts
 EOF
 SCRIPT
 
+$start = <<SCRIPT
+cat << EOF >> /root/start1.sh
+#!/usr/bin/env bash
+
+set -o errexit
+set -o xtrace
+
+cd /opt/os-ansible-deployment/rpc_deployment
+fping 172.29.236.2 172.29.236.5 172.29.236.10
+ansible-playbook -v -e @/etc/rpc_deploy/user_variables.yml playbooks/setup/host-setup.yml
+ansible-playbook -v -e @/etc/rpc_deploy/user_variables.yml playbooks/infrastructure/haproxy-install.yml
+ansible-playbook -v -e @/etc/rpc_deploy/user_variables.yml playbooks/openstack/openstack-setup.yml
+EOF
+SCRIPT
+
 $proxy = <<SCRIPT
-echo 'Acquire::http { Proxy "http://10.64.200.100:3142"; };' > /etc/apt/apt.conf.d/10mirror
+echo 'Acquire::http { Proxy "http://10.64.200.100:8000"; };' > /etc/apt/apt.conf.d/10mirror
+SCRIPT
+
+$aptchange = <<SCRIPT
+sed -i "s#//kambing.ui.ac.id#//buaya.klas.or.id#g" /etc/apt/sources.list
+apt-get -qq update
 SCRIPT
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
@@ -31,6 +51,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     deploy1_config.vm.provision "shell", inline: $script
     deploy1_config.vm.provision "shell", inline: $proxy
+    deploy1_config.vm.provision "shell", inline: $aptchange
+    deploy1_config.vm.provision "shell", inline: $start
 
     # eth1
     deploy1_config.vm.network "private_network", ip: "172.29.236.7"
